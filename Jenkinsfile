@@ -15,22 +15,22 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube'
-                    withSonarQubeEnv('SonarQube') {
-                        // Use the SONAR_TOKEN variable from your environment block
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=ParentPortal \
-                            -Dsonar.projectName='Parent Portal' \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token=${SONAR_TOKEN}"
-                    }
-                }
+       stage('SonarQube Scan') {
+    steps {
+        script {
+            def scannerHome = tool 'SonarQube'
+            withSonarQubeEnv('SonarQube') {
+                // Double quotes for the whole string, single for the token to avoid warnings
+                sh "${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=ParentPortal \
+                    -Dsonar.projectName='Parent Portal' \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.token=${SONAR_TOKEN}"
             }
         }
+    }
+}
 
         stage('Quality Gate') {
             steps {
