@@ -39,13 +39,11 @@ pipeline {
             }
         }
 
-        stage('Deploy HA') {
-            steps {
-                // Ensure the deployment uses the local config files
-                sh 'docker compose up -d --force-recreate --remove-orphans'
-            }
-        }
+       stage('Deploy HA') {
+    steps {
+        sh 'docker compose up -d --force-recreate --remove-orphans'
     }
+}
 
     post {
         always {
