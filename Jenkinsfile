@@ -17,15 +17,16 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube'
-                    withSonarQubeEnv('SonarQube') {
-                        // Using single quotes around the shell command and token
-                        // handles the security warning and the pathing in one go.
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=ParentPortal \
-                            -Dsonar.projectName='Parent Portal' \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token='${SONAR_TOKEN}'"
+                    // This is the most secure way to pass secrets in a pipeline
+                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
+                        withSonarQubeEnv('SonarQube') {
+                            sh "${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=ParentPortal \
+                                -Dsonar.projectName='Parent Portal' \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://localhost:9000 \
+                                -Dsonar.token=${SONAR_AUTH_TOKEN}"
+                        }
                     }
                 }
             }
