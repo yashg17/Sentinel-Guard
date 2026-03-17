@@ -12,15 +12,16 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube'
-                    // Using withCredentials to mask the token in debug logs
+                    // This masks the secret and prevents the "Groovy interpolation" warning
                     withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
                         withSonarQubeEnv('SonarQube') {
-                           sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=ParentPortal \
-                            -Dsonar.projectName='Parent Portal' \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://34.229.95.117:9000 \
-                            -Dsonar.token=${SONAR_AUTH_TOKEN}"
+                            // Using single quotes (') ensures the shell handles the variable, not Groovy.
+                            sh "'${scannerHome}/bin/sonar-scanner' " +
+                               "-Dsonar.projectKey=ParentPortal " +
+                               "-Dsonar.projectName='Parent Portal' " +
+                               "-Dsonar.sources=. " +
+                               "-Dsonar.host.url=http://34.229.95.117:9000 " +
+                               "-Dsonar.token=${SONAR_AUTH_TOKEN}"
                         }
                     }
                 }
