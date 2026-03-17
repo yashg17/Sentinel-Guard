@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                // Building the images
                 sh 'docker compose build'
             }
         }
@@ -19,7 +18,6 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarQube'
                     withSonarQubeEnv('SonarQube') {
-                        // Use env.VAR to avoid security warnings
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=ParentPortal \
                             -Dsonar.projectName='Parent Portal' \
@@ -39,11 +37,12 @@ pipeline {
             }
         }
 
-       stage('Deploy HA') {
-    steps {
-        sh 'docker compose up -d --force-recreate --remove-orphans'
+        stage('Deploy HA') {
+            steps {
+                sh 'docker compose up -d --force-recreate --remove-orphans'
+            }
+        }
     }
-}
 
     post {
         always {
