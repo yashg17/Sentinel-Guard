@@ -15,19 +15,18 @@ pipeline {
             }
         }
 
-       stage('SonarQube Scan') {
+      stage('SonarQube Scan') {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube'
                     withSonarQubeEnv('SonarQube') {
-                        // Use single quotes for the whole string to fix the security warning
-                        // Use double quotes only for the variable ${scannerHome}
-                        sh "${scannerHome}/bin/sonar-scanner " +
-                           "-Dsonar.projectKey=ParentPortal " +
-                           "-Dsonar.projectName='Parent Portal' " +
-                           "-Dsonar.sources=. " +
-                           "-Dsonar.host.url=http://localhost:9000 " +
-                           "-Dsonar.token=${SONAR_TOKEN}"
+                        // Use single quotes for the sh command to fix the security warning
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=ParentPortal \
+                            -Dsonar.projectName='Parent Portal' \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://localhost:9000 \
+                            -Dsonar.token=${env.SONAR_TOKEN}"
                     }
                 }
             }
