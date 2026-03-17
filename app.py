@@ -1,22 +1,18 @@
 from flask import Flask, request
 import logging
-from prometheus_client import make_wsgi_app
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 
 # 1. Setup Logging
-logging.basicConfig(
-    filename='portal.log', 
-    level=logging.INFO, 
-    format='%(asctime)s %(message)s'
-)
+logging.basicConfig(filename='portal.log', level=logging.INFO, format='%(asctime)s %(message)s')
 
-# 2. Add Prometheus Middleware
-# This captures all requests to /metrics and handles them automatically
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/metrics': make_wsgi_app()
-})
+# 2. Setup Automatic Flask Metrics
+# this provides the /metrics endpoint AND tracks request durations
+metrics = PrometheusMetrics(app)
+
+# Static information for your dashboard
+metrics.info('app_info', 'AI Sentinel Application', version='1.0.0')
 
 @app.route('/')
 def hello():
@@ -24,11 +20,9 @@ def hello():
 
 @app.route('/api/data')
 def get_data():
-    # Log the access pattern for AI mining
     param = request.args.get('query', 'none')
     app.logger.info(f"Access: param={param}, IP={request.remote_addr}")
-    return {"status": "success", "portal": "ParentPortal", "message": "AI Sentinel Active"}
+    return {"status": "success", "portal": "ParentPortal"}
 
 if __name__ == "__main__":
-    # Ensure it listens on all interfaces so Docker can reach it
     app.run(host='0.0.0.0', port=5000)
