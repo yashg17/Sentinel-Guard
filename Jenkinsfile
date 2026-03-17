@@ -18,16 +18,15 @@ pipeline {
         stage('SonarQube Scan') {
             steps {
                 script {
-                    // This pulls the scanner you named 'SonarQube' in Tools
                     def scannerHome = tool 'SonarQube'
-                    
-                    // This uses the server named 'SonarQube' in System
                     withSonarQubeEnv('SonarQube') {
+                        // Added -Dsonar.working.directory to ensure the report file is generated correctly
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=ParentPortal \
                             -Dsonar.projectName='Parent Portal' \
                             -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000"
+                            -Dsonar.host.url=http://localhost:9000 \
+                            -Dsonar.working.directory=.scannerwork"
                     }
                 }
             }
