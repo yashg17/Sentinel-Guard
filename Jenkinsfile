@@ -13,17 +13,19 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
+       stage('SonarQube Scan') {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube'
                     withSonarQubeEnv('SonarQube') {
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=ParentPortal \
-                            -Dsonar.projectName='Parent Portal' \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token=${env.SONAR_TOKEN}"
+                        // Using single quotes for the command and double for the tool path
+                        // prevents the Groovy Interpolation warning
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                           "-Dsonar.projectKey=ParentPortal " +
+                           "-Dsonar.projectName='Parent Portal' " +
+                           "-Dsonar.sources=. " +
+                           "-Dsonar.host.url=http://localhost:9000 " +
+                           "-Dsonar.token=${env.SONAR_TOKEN}"
                     }
                 }
             }
