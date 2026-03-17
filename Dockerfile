@@ -1,22 +1,14 @@
-# Stage 1: Builder
-FROM python:3.9-slim AS builder
+FROM python:3.11-slim
 WORKDIR /app
+
+# Copy ONLY requirements first
 COPY requirements.txt .
-# Install dependencies to a local folder
-RUN pip install --user --no-cache-dir -r requirements.txt
 
-# Stage 2: Production
-FROM python:3.9-slim
-WORKDIR /app
+# Install dependencies - this is now cached and won't rerun unless requirements change
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy only the installed dependencies and code
-COPY --from=builder /root/.local /root/.local
+# Copy the rest of the code LAST
 COPY . .
 
-# Update PATH to include the user-installed binaries
-ENV PATH=/root/.local/bin:$PATH
-ENV FLASK_ENV=production
-
-EXPOSE 5000 8000
-# Run the security miner and the app together using a shell
-CMD python log_security.py & python app.py
+EXPOSE 5000
+CMD ["python", "app.py"]
