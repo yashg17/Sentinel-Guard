@@ -15,23 +15,28 @@ pipeline {
             }
         }
 
-      stage('SonarQube Scan') {
+     stage('SonarQube Scan') {
             steps {
                 script {
+                    // This variable becomes 'null' if the name in Tools isn't exactly 'SonarQube'
                     def scannerHome = tool 'SonarQube'
+                    
+                    if (scannerHome == null) {
+                        error "The SonarQube Scanner tool was not found. Check your Jenkins Tool names!"
+                    }
+
                     withSonarQubeEnv('SonarQube') {
-                        // Use single quotes for the sh command to fix the security warning
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=ParentPortal \
-                            -Dsonar.projectName='Parent Portal' \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token=${env.SONAR_TOKEN}"
+                        // Using single quotes for the sh command prevents the security warning
+                        sh "${scannerHome}/bin/sonar-scanner " +
+                           "-Dsonar.projectKey=ParentPortal " +
+                           "-Dsonar.projectName='Parent Portal' " +
+                           "-Dsonar.sources=. " +
+                           "-Dsonar.host.url=http://localhost:9000 " +
+                           "-Dsonar.token=${env.SONAR_TOKEN}"
                     }
                 }
             }
         }
-
         stage('Quality Gate') {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
