@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube'
-                    // This is the most secure way to pass secrets in a pipeline
+                    // This masks the secret and prevents the "Groovy interpolation" warning
                     withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
                         withSonarQubeEnv('SonarQube') {
                             sh "${scannerHome}/bin/sonar-scanner \
