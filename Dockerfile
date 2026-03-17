@@ -1,14 +1,17 @@
 FROM python:3.11-slim
-WORKDIR /app
 
-# Copy ONLY requirements first
-COPY requirements.txt .
+# Create a system user to avoid running as root
+RUN useradd -m myuser
+USER myuser
+WORKDIR /home/myuser/app
 
-# Install dependencies - this is now cached and won't rerun unless requirements change
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --chown=myuser:myuser requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Copy the rest of the code LAST
-COPY . .
+# Ensure the local bin is in PATH
+ENV PATH="/home/myuser/.local/bin:${PATH}"
+
+COPY --chown=myuser:myuser . .
 
 EXPOSE 5000
 CMD ["python", "app.py"]
