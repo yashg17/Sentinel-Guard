@@ -20,13 +20,13 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarQube'
                     withSonarQubeEnv('SonarQube') {
-                        // Added -Dsonar.working.directory to ensure the report file is generated correctly
+                        // Use the SONAR_TOKEN variable from your environment block
                         sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=ParentPortal \
                             -Dsonar.projectName='Parent Portal' \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.working.directory=.scannerwork"
+                            -Dsonar.token=${SONAR_TOKEN}"
                     }
                 }
             }
