@@ -9,6 +9,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                // Building the images
                 sh 'docker compose build'
             }
         }
@@ -16,25 +17,15 @@ pipeline {
         stage('SonarQube Scan') {
             steps {
                 script {
-                    // MUST match the Name in Manage Jenkins -> Tools exactly
                     def scannerHome = tool 'SonarQube'
-                    
-                    if (scannerHome == null) {
-                        error "The tool 'SonarQube' was not found in Jenkins Tools. Check spelling and case!"
-                    }
-
-                    // withSonarQubeEnv matches the Name in Manage Jenkins -> System
                     withSonarQubeEnv('SonarQube') {
-                        // Fixed: Single quotes around the whole command, 
-                        // and using env.SONAR_TOKEN to fix the security warning.
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
+                        // Use env.VAR to avoid security warnings
+                        sh "${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=ParentPortal \
                             -Dsonar.projectName='Parent Portal' \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.token=${env.SONAR_TOKEN}
-                        """
+                            -Dsonar.token=${env.SONAR_TOKEN}"
                     }
                 }
             }
@@ -50,6 +41,7 @@ pipeline {
 
         stage('Deploy HA') {
             steps {
+                // Ensure the deployment uses the local config files
                 sh 'docker compose up -d --force-recreate --remove-orphans'
             }
         }
