@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # The Parent Portal App
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+    volumes:
+      - ./security.log:/app/security.log
+    restart: always
+
+  # Prometheus Replica 1
+  prometheus-1:
+    image: prom/prometheus:latest
+    container_name: prometheus-1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url=http://localhost:9090'
+    ports:
+      - "9090:9090"
+    restart: always
+
+  # Prometheus Replica 2 (HA Sidecar)
+  prometheus-2:
+    image: prom/prometheus:latest
+    container_name: prometheus-2
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url=http://localhost:9091'
+    ports:
+      - "9091:9090" # Exposed on 9091 to avoid conflict
+    restart: always
+
+  # Alertmanager (Clustered)
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--cluster.listen-address=0.0.0.0:9094'
+    ports:
+      - "9093:9093"
+    restart: always
