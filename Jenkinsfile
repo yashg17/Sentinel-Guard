@@ -12,9 +12,11 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube'
+                    // Using withCredentials to mask the token in debug logs
                     withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
                         withSonarQubeEnv('SonarQube') {
                             sh "${scannerHome}/bin/sonar-scanner \
+                                -X \
                                 -Dsonar.projectKey=ParentPortal \
                                 -Dsonar.projectName='Parent Portal' \
                                 -Dsonar.sources=. \
