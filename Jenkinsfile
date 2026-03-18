@@ -15,7 +15,7 @@ pipeline {
                             ${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.projectKey=ParentPortal \
                                 -Dsonar.sources=. \
-                                -Dsonar.host.url=http://172.31.25.22:9000 \
+                                -Dsonar.host.url=http://54.242.184.178:9000 \
                                 -Dsonar.token=\$SONAR_TOKEN_ENV \
                                 -Dsonar.python.version=3 \
                                 -Dsonar.exclusions='**/venv/**,**/node_modules/**,**/.docker/**,**/__pycache__/**'
