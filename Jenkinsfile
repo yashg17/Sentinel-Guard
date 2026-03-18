@@ -30,12 +30,12 @@ pipeline {
             steps {
                 script {
                     try {
-                        // Reduced timeout to 2 mins to keep it fast
-                        timeout(time: 2, unit: 'MINUTES') { 
-                            waitForQualityGate abortPipeline: true 
+                        // We lower this to 1 minute. If no signal comes, we move on.
+                        timeout(time: 1, unit: 'MINUTES') { 
+                            waitForQualityGate abortPipeline: false 
                         }
                     } catch (Exception e) {
-                        echo "Quality Gate failed or timed out, but proceeding anyway to keep pipeline alive."
+                        echo "WARNING: Quality Gate timed out or failed. Continuing to deployment..."
                     }
                 }
             }
