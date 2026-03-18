@@ -19,7 +19,7 @@ pipeline {
                                 -Dsonar.projectKey=ParentPortal \
                                 -Dsonar.projectName='Parent Portal' \
                                 -Dsonar.sources=. \
-                                -Dsonar.host.url=http://34.229.95.117:9000 \
+                                -Dsonar.host.url=http://54.242.184.178:9000 \
                                 -Dsonar.token='${SONAR_AUTH_TOKEN}'"
                         }
                     }
