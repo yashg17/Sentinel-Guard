@@ -11,24 +11,28 @@ pipeline {
             }
         }
         
-        stage('SonarQube Scan') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube'
-                    // Using the Private IP to avoid AWS hairpin routing timeouts
-                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
-                        withSonarQubeEnv('SonarQube') {
-                            sh "${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=ParentPortal \
-                                -Dsonar.projectName='Parent Portal' \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://172.31.25.22:9000 \
-                                -Dsonar.token=${SONAR_AUTH_TOKEN}" 
-                        }
-                    }
+       stage('SonarQube Scan') {
+    steps {
+        script {
+            def scannerHome = tool 'SonarQube'
+            // We map the credential to an ENV variable to avoid the security warning
+            withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN_ENV')]) {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=ParentPortal \
+                        -Dsonar.projectName='Parent Portal' \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://172.31.25.22:9000 \
+                        -Dsonar.token=\$SONAR_TOKEN_ENV \
+                        -Dsonar.python.version=3 \
+                        -Dsonar.exclusions='**/venv/**,**/__pycache__/**,*.log,*.db,**/node_modules/**'
+                    """
                 }
             }
         }
+    }
+}
 
         stage('Quality Gate') {
             steps {
