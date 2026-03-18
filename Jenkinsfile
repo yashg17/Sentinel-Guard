@@ -5,26 +5,24 @@ pipeline {
             steps { sh 'docker compose build' }
         }
         
-        stage('SonarQube Scan') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube'
-                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN_ENV')]) {
-                        withSonarQubeEnv('SonarQube') {
-                           sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=ParentPortal \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://54.242.184.178:9000 \
-                                -Dsonar.token=\$SONAR_TOKEN_ENV \
-                                -Dsonar.python.version=3 \
-                                -Dsonar.exclusions='**/venv/**,**/node_modules/**,**/.docker/**,**/__pycache__/**'
-                            """
-                        }
-                    }
-                }
+       stage('SonarQube Scan') {
+    steps {
+        script {
+            def scannerHome = tool 'SonarQube'
+            // withSonarQubeEnv automatically injects the URL and Token from Jenkins UI
+            withSonarQubeEnv('SonarQube') {
+                sh """
+                ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=ParentPortal \
+                    -Dsonar.projectName='Parent Portal' \
+                    -Dsonar.sources=. \
+                    -Dsonar.python.version=3 \
+                    -Dsonar.exclusions='**/venv/**,**/node_modules/**,**/.docker/**,**/__pycache__/**'
+                """
             }
         }
+    }
+}
 
         stage('Quality Gate') {
             steps {
