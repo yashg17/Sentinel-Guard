@@ -18,15 +18,13 @@ pipeline {
             // We map the credential to an ENV variable to avoid the security warning
             withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN_ENV')]) {
                 withSonarQubeEnv('SonarQube') {
-                    sh """
+                   sh """
                     ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=ParentPortal \
-                        -Dsonar.projectName='Parent Portal' \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://172.31.25.22:9000 \
                         -Dsonar.token=\$SONAR_TOKEN_ENV \
-                        -Dsonar.python.version=3 \
-                        -Dsonar.exclusions='**/venv/**,**/__pycache__/**,*.log,*.db,**/node_modules/**'
+                        -Dsonar.exclusions='**/venv/**,**/node_modules/**,**/.docker/**,**/__pycache__/**'
                     """
                 }
             }
