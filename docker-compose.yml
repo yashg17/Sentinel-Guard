@@ -21,7 +21,7 @@ services:
       - sonarqube-data:/opt/sonarqube/data
     restart: always
 
-prometheus:
+  prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     user: root
@@ -57,13 +57,15 @@ prometheus:
       - sentinel-net
     restart: always
 
- loki:
+  loki:
     image: grafana/loki:latest
     container_name: loki
+    user: root
     ports:
       - "3100:3100"
     volumes:
       - /home/ubuntu/loki-config/loki-local-config.yaml:/etc/loki/local-config.yaml
+      - /tmp/loki:/tmp/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - sentinel-net
@@ -81,7 +83,7 @@ prometheus:
       - sentinel-net
     restart: always
 
-grafana:
+  grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
