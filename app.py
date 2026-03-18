@@ -1,27 +1,25 @@
 from flask import Flask, request
-import logging
 from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Counter # Import the Counter class
 
 app = Flask(__name__)
-
-# 1. Setup Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-
-# 2. Setup Flask Metrics (This replaces the old DispatcherMiddleware)
-# This automatically handles the /metrics route and monitors all other routes
 metrics = PrometheusMetrics(app)
 
-# Add some static info for your Prometheus dashboard
-metrics.info('app_info', 'AI Sentinel', version='1.0.0')
+# 1. Define the custom metric (must match your Grafana query)
+FAILED_LOGINS = Counter('security_failed_logins_total', 'Total failed login attempts')
 
 @app.route('/')
-def hello():
-    return "AI Sentinel is running!"
+def index():
+    return "Sentinel Home"
 
-@app.route('/api/data')
-def get_data():
-    param = request.args.get('query', 'none')
-    return {"status": "success", "portal": "ParentPortal", "query": param}
+# 2. Add the missing login route
+@app.route('/api/login')
+def login():
+    status = request.args.get('status')
+    if status == 'fail':
+        FAILED_LOGINS.inc() # This is what sends data to Prometheus
+        return "Login failed recorded", 401
+    return "Login attempt"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
