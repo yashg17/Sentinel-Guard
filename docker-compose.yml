@@ -38,7 +38,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # REMOVED PORTS: No more 8080 conflicts
+    # NO PORTS MAPPED TO HOST -> 100% NO CONFLICTS
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -52,7 +52,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # REMOVED PORTS: No more 9100 conflicts
+    # NO PORTS MAPPED TO HOST -> 100% NO CONFLICTS
     networks:
       - sentinel-net
     restart: always
