@@ -1,54 +1,92 @@
+version: '3.8'
+
 services:
-  # The Parent Portal App
+  # 1. The Application (High Availability - Node 1)
   app:
     build: .
+    container_name: sentinel-app-1
     ports:
       - "5000:5000"
     environment:
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-    volumes:
-      - ./security.log:/app/security.log
+    networks:
+      - sentinel-net
     restart: always
 
-  # Prometheus Replica 1
+  # 2. Monitoring - Prometheus Instance 1
   prometheus-1:
     image: prom/prometheus:latest
     container_name: prometheus-1
+    ports:
+      - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus-data-1:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--web.external-url=http://localhost:9090'
-    ports:
-      - "9090:9090"
+    networks:
+      - sentinel-net
     restart: always
 
-  # Prometheus Replica 2 (HA Sidecar)
+  # 3. Monitoring - Prometheus Instance 2 (HA Backup)
   prometheus-2:
     image: prom/prometheus:latest
     container_name: prometheus-2
+    ports:
+      - "9091:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.external-url=http://localhost:9091'
-    ports:
-      - "9091:9090" # Exposed on 9091 to avoid conflict
+      - prometheus-data-2:/prometheus
+    networks:
+      - sentinel-net
     restart: always
 
-  # Alertmanager (Clustered)
+  # 4. Visualization - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - sentinel-net
+    restart: always
+
+  # 5. Alerting - Alertmanager
   alertmanager:
     image: prom/alertmanager:latest
     container_name: alertmanager
-    volumes:
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--cluster.listen-address=0.0.0.0:9094'
     ports:
       - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - sentinel-net
     restart: always
+
+  # 6. Static Analysis - SonarQube
+  sonarqube:
+    image: sonarqube:9.9-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    networks:
+      - sentinel-net
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+      - sonarqube-extensions:/opt/sonarqube/extensions
+
+networks:
+  sentinel-net:
+    driver: bridge
+
+volumes:
+  prometheus-data-1:
+  prometheus-data-2:
+  grafana-data:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
