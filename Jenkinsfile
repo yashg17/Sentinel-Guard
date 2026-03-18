@@ -9,23 +9,23 @@ pipeline {
             steps { sh 'docker compose build' }
         }
        stage('SonarQube Scan') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube'
-                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
-                        withSonarQubeEnv('SonarQube') {
-                            // Using single quotes around the token variable kills the security warning
-                            sh "${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=ParentPortal \
-                                -Dsonar.projectName='Parent Portal' \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://54.242.184.178:9000 \
-                                -Dsonar.token='${SONAR_AUTH_TOKEN}'"
-                        }
-                    }
+    steps {
+        script {
+            def scannerHome = tool 'SonarQube'
+            withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
+                withSonarQubeEnv('SonarQube') {
+                    // Use the PRIVATE IP here
+                    sh "${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=ParentPortal \
+                        -Dsonar.projectName='Parent Portal' \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://172.31.25.22:9000 \
+                        -Dsonar.token='${SONAR_AUTH_TOKEN}'"
                 }
             }
         }
+    }
+}
         stage('Quality Gate') {
             steps {
                 timeout(time: 10, unit: 'MINUTES') { waitForQualityGate abortPipeline: true }
