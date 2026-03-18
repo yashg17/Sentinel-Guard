@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # 1. The Application (High Availability - Node 1)
   app:
     build: .
     container_name: sentinel-app-1
@@ -13,7 +12,6 @@ services:
       - sentinel-net
     restart: always
 
-  # 2. Monitoring - Prometheus Instance 1
   prometheus-1:
     image: prom/prometheus:latest
     container_name: prometheus-1
@@ -29,7 +27,6 @@ services:
       - sentinel-net
     restart: always
 
-  # 3. Monitoring - Prometheus Instance 2 (HA Backup)
   prometheus-2:
     image: prom/prometheus:latest
     container_name: prometheus-2
@@ -42,7 +39,6 @@ services:
       - sentinel-net
     restart: always
 
-  # 4. Visualization - Grafana
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -54,7 +50,6 @@ services:
       - sentinel-net
     restart: always
 
-  # 5. Alerting - Alertmanager
   alertmanager:
     image: prom/alertmanager:latest
     container_name: alertmanager
@@ -66,7 +61,6 @@ services:
       - sentinel-net
     restart: always
 
-  # 6. Static Analysis - SonarQube
   sonarqube:
     image: sonarqube:9.9-community
     container_name: sonarqube
@@ -78,6 +72,28 @@ services:
       - sonarqube-data:/opt/sonarqube/data
       - sonarqube-logs:/opt/sonarqube/logs
       - sonarqube-extensions:/opt/sonarqube/extensions
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - sentinel-net
+    restart: always
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock # Added this to allow log discovery
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - sentinel-net
+    restart: always
 
 networks:
   sentinel-net:
