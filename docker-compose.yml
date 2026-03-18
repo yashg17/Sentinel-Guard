@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # 1. The Application
   app:
     build: .
     container_name: sentinel-app-1
@@ -12,6 +13,7 @@ services:
       - sentinel-net
     restart: always
 
+  # 2. Monitoring - Prometheus
   prometheus-1:
     image: prom/prometheus:latest
     container_name: prometheus-1
@@ -19,7 +21,6 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
       - prometheus-data-1:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -28,17 +29,7 @@ services:
       - sentinel-net
     restart: always
 
-  alertmanager:
-    image: prom/alertmanager:latest
-    container_name: alertmanager
-    ports:
-      - "9093:9093"
-    volumes:
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    networks:
-      - sentinel-net
-    restart: always
-
+  # 3. Visualization - Grafana
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -50,6 +41,19 @@ services:
       - sentinel-net
     restart: always
 
+  # 4. Alerting - Alertmanager
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - sentinel-net
+    restart: always
+
+  # 5. Static Analysis - SonarQube (Fixed Port 9005)
   sonarqube:
     image: sonarqube:9.9-community
     container_name: sonarqube
@@ -63,6 +67,7 @@ services:
       - sonarqube-extensions:/opt/sonarqube/extensions
     restart: always
 
+  # 6. Logging - Loki
   loki:
     image: grafana/loki:latest
     container_name: loki
@@ -73,6 +78,7 @@ services:
       - sentinel-net
     restart: always
 
+  # 7. Logging - Promtail (Log Shipper)
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
@@ -93,3 +99,5 @@ volumes:
   prometheus-data-1:
   grafana-data:
   sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
