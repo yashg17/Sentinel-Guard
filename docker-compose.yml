@@ -38,8 +38,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    ports:
-      - "8080:8080"
+    # REMOVED PORTS: No more 8080 conflicts
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -53,8 +52,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    ports:
-      - "9101:9100"  # Changed host port to 9101 to avoid 9100 conflict
+    # REMOVED PORTS: No more 9100 conflicts
     networks:
       - sentinel-net
     restart: always
