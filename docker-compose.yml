@@ -66,7 +66,7 @@ services:
       - sonarqube-data:/opt/sonarqube/data
       - sonarqube-logs:/opt/sonarqube/logs
       - sonarqube-extensions:/opt/sonarqube/extensions
-    restart: always
+    restart: no
 
   # 6. Logging - Loki (Database)
   loki:
