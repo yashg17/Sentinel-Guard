@@ -12,7 +12,7 @@ services:
 
   sonarqube:
     image: sonarqube:9.9-community
-    container_name: sonarqube
+    container_name: sonar-sonarqube-1
     ports:
       - "9005:9000"
     networks:
@@ -27,19 +27,19 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./loki-config/loki-local-config.yaml:/etc/loki/local-config.yaml
+      - /home/ubuntu/loki-config/loki-local-config.yaml:/etc/loki/local-config.yaml
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - sentinel-net
     restart: always
 
-promtail:
+  promtail:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./promtail-config.yml:/etc/promtail/config.yml
+      - /home/ubuntu/sonar/promtail-config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     networks:
       - sentinel-net
