@@ -38,6 +38,8 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
+    ports:
+      - "8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -51,32 +53,28 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
+    ports:
+      - "9101:9100"  # Changed host port to 9101 to avoid 9100 conflict
     networks:
       - sentinel-net
     restart: always
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:2.9.0
     container_name: loki
-    user: root
     ports:
       - "3100:3100"
-    volumes:
-      - /home/ubuntu/loki-config/loki-local-config.yaml:/etc/loki/local-config.yaml
-      - /tmp/loki:/tmp/loki
-    command: -config.file=/etc/loki/local-config.yaml
     networks:
       - sentinel-net
     restart: always
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:2.9.0
     container_name: promtail
     volumes:
+      - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/ubuntu/sonar/promtail-config.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
     networks:
       - sentinel-net
     restart: always
@@ -96,4 +94,3 @@ networks:
 
 volumes:
   sonarqube-data:
-  grafana-data:
