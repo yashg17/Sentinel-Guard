@@ -21,20 +21,27 @@ services:
       - sonarqube-data:/opt/sonarqube/data
     restart: always
 
-  prometheus:
+ prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    user: root
     ports:
       - "9090:9090"
     volumes:
       - /home/ubuntu/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /home/ubuntu/prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
     networks:
       - sentinel-net
     restart: always
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
+    ports:
+      - "8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -47,6 +54,8 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
+    ports:
+      - "9100:9100"
     networks:
       - sentinel-net
     restart: always
@@ -75,7 +84,7 @@ services:
       - sentinel-net
     restart: always
 
-  grafana:
+ grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
