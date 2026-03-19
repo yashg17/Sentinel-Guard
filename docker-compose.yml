@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   app:
     build: .
@@ -6,6 +8,17 @@ services:
       - "5000:5000"
     networks:
       - sentinel-net
+    restart: always
+
+  sonarqube:
+    image: sonarqube:9.9-community
+    container_name: sonar-sonarqube-1
+    ports:
+      - "9005:9000"
+    networks:
+      - sentinel-net
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
     restart: always
 
   prometheus:
@@ -27,12 +40,13 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # NO PORTS MAPPED TO HOST = NO CONFLICTS
+    # Internal only to prevent "Address already in use"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     networks:
       - sentinel-net
     restart: always
@@ -40,7 +54,38 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # NO PORTS MAPPED TO HOST = NO CONFLICTS
+    # Internal only to prevent "Address already in use"
+    networks:
+      - sentinel-net
+    restart: always
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - sentinel-net
+    restart: always
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/ubuntu/sonar/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - sentinel-net
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
     networks:
       - sentinel-net
     restart: always
@@ -48,3 +93,7 @@ services:
 networks:
   sentinel-net:
     driver: bridge
+
+volumes:
+  sonarqube-data:
+  grafana-data:
