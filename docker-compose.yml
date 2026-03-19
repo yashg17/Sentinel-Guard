@@ -8,17 +8,6 @@ services:
       - sentinel-net
     restart: always
 
-  sonarqube:
-    image: sonarqube:9.9-community
-    container_name: sonar-sonarqube-1
-    ports:
-      - "9005:9000"
-    networks:
-      - sentinel-net
-    volumes:
-      - sonarqube-data:/opt/sonarqube/data
-    restart: always
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -38,7 +27,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # REMOVED PORTS TO FIX YOUR ERROR FOREVER
+    # NO PORTS MAPPED TO HOST = NO CONFLICTS
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -51,16 +40,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # REMOVED PORTS TO FIX YOUR ERROR FOREVER
-    networks:
-      - sentinel-net
-    restart: always
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
+    # NO PORTS MAPPED TO HOST = NO CONFLICTS
     networks:
       - sentinel-net
     restart: always
@@ -68,6 +48,3 @@ services:
 networks:
   sentinel-net:
     driver: bridge
-
-volumes:
-  sonarqube-data:
