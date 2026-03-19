@@ -38,7 +38,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # No host ports = no conflicts
+    # REMOVED PORTS TO AVOID CONFLICTS
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -51,7 +51,27 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # No host ports = no conflicts
+    # REMOVED PORTS TO AVOID CONFLICTS
+    networks:
+      - sentinel-net
+    restart: always
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - sentinel-net
+    restart: always
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - sentinel-net
     restart: always
