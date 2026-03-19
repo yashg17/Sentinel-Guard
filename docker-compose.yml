@@ -38,13 +38,12 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # NO PORTS MAPPED TO HOST -> 100% NO CONFLICTS
+    # No host ports = no conflicts
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
     networks:
       - sentinel-net
     restart: always
@@ -52,27 +51,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # NO PORTS MAPPED TO HOST -> 100% NO CONFLICTS
-    networks:
-      - sentinel-net
-    restart: always
-
-  loki:
-    image: grafana/loki:2.9.0
-    container_name: loki
-    ports:
-      - "3100:3100"
-    networks:
-      - sentinel-net
-    restart: always
-
-  promtail:
-    image: grafana/promtail:2.9.0
-    container_name: promtail
-    volumes:
-      - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+    # No host ports = no conflicts
     networks:
       - sentinel-net
     restart: always
