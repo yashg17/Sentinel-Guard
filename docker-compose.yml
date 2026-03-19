@@ -38,7 +38,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # NO PORTS MAPPED TO HOST = NO MORE ERRORS
+    # REMOVED PORTS TO FIX YOUR ERROR FOREVER
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -51,7 +51,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # NO PORTS MAPPED TO HOST = NO MORE ERRORS
+    # REMOVED PORTS TO FIX YOUR ERROR FOREVER
     networks:
       - sentinel-net
     restart: always
