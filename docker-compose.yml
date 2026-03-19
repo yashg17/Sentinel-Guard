@@ -40,13 +40,12 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # Internal only to prevent "Address already in use"
+    # NO PORTS MAPPED TO HOST - FIXED FOREVER
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
     networks:
       - sentinel-net
     restart: always
@@ -54,7 +53,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # Internal only to prevent "Address already in use"
+    # NO PORTS MAPPED TO HOST - FIXED FOREVER
     networks:
       - sentinel-net
     restart: always
@@ -75,8 +74,6 @@ services:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/ubuntu/sonar/promtail-config.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
     networks:
       - sentinel-net
     restart: always
@@ -96,4 +93,3 @@ networks:
 
 volumes:
   sonarqube-data:
-  grafana-data:
