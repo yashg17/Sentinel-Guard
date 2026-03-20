@@ -40,7 +40,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    # REMOVED PORTS: This fixes the "Address already in use" error forever
+    # FIXED: Ports removed from host to bypass "Address already in use"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -53,7 +53,7 @@ services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
-    # REMOVED PORTS: This fixes the "Address already in use" error forever
+    # FIXED: Ports removed from host to bypass "Address already in use"
     networks:
       - sentinel-net
     restart: always
